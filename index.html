@@ -35,6 +35,32 @@
       display: flex;
       height: 100vh;
       overflow: hidden;
+      position: relative;
+    }
+
+    /* Mobile Header (standardmäßig unsichtbar) */
+    .mobile-header {
+      display: none;
+      background-color: var(--bg-sidebar);
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-sidebar);
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .menu-toggle-btn {
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    .mobile-logo {
+      height: 30px;
     }
 
     .sidebar {
@@ -45,6 +71,8 @@
       flex-direction: column;
       overflow-y: auto;
       border-right: 1px solid var(--border-sidebar);
+      transition: transform 0.3s ease;
+      z-index: 50;
     }
 
     .brand {
@@ -91,6 +119,14 @@
     }
 
     .nav-num { font-size: 0.85rem; opacity: 0.8; min-width: 18px; }
+
+    /* Layout Wrapper für Main */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
     .main-content {
       flex: 1;
@@ -180,26 +216,74 @@
       border-radius: 8px;
       box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     }
+
+    /* --- RESPONSIVES DESIGN FÜR MOBILE GERÄTE --- */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      .mobile-header {
+        display: flex;
+      }
+      .sidebar {
+        position: fixed;
+        top: 65px; /* Unterhalb des Mobile Headers */
+        left: 0;
+        bottom: 0;
+        width: 80%;
+        max-width: 300px;
+        transform: translateX(-100%); /* Standardmäßig versteckt */
+        box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+      }
+      .sidebar.open {
+        transform: translateX(0); /* Einblenden */
+      }
+      .brand {
+        display: none; /* Logo im Menü verstecken, da es schon oben im Header ist */
+      }
+      .main-content {
+        padding: 1.5rem;
+      }
+      .chapter-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+      .chapter-title {
+        font-size: 2rem;
+      }
+      .card {
+        padding: 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebarMenu">
     <div class="brand">
-      <!-- Fehler-Unterdrückung entfernt, um Fehler anzuzeigen, falls Name nicht passt -->
       <img src="Logo_Korkwerk.png" alt="Korkwerk Logo">
-      <p>Korkparkett Verlege-Anleitung<br>für Fachpersonal</p>
+      <p>Korkparkett<br>Verlege-Anleitung<br>für Fachpersonal</p>
     </div>
     <ul class="nav-list" id="sidebarNav">
     </ul>
   </aside>
 
-  <main class="main-content">
-    <div class="content-container">
-      <div id="manualOutput">
-      </div>
+  <div class="main-wrapper">
+    <!-- Mobiler Header -->
+    <div class="mobile-header">
+      <button class="menu-toggle-btn" id="menuToggleBtn">☰</button>
+      <img src="Logo_Korkwerk.png" alt="Korkwerk Logo" class="mobile-logo">
+      <div style="width: 30px;"></div> <!-- Platzhalter für Symmetrie -->
     </div>
-  </main>
+
+    <main class="main-content" id="mainContent">
+      <div class="content-container">
+        <div id="manualOutput">
+        </div>
+      </div>
+    </main>
+  </div>
 
 <script>
   let globalXMLDoc = null;
@@ -211,8 +295,8 @@
     <number></number>
     <title>Willkommen bei Korkwerk</title>
     <section id="start-intro" type="concept">
-      <media type="image" src="Titelblatt_Wohnbeispiel.jpg"  />
-      <lead>Herzlich willkommen in der digitalen Verlege-Anleitung von Korkwerk. Diese interaktive Anleitung unterstützt Fachpersonal Schritt für Schritt bei der perfekten Verlegung unserer natürlichen Korkböden.</lead>
+      <media type="image" src="Titelblatt_Wohnbeispiel.jpg" caption="Natürliche Korkböden für Ihr Zuhause" />
+      <lead>Herzlich willkommen im digitalen Montagehandbuch von Korkwerk. Diese interaktive Anleitung unterstützt Sie Schritt für Schritt bei der perfekten Verlegung unserer natürlichen Korkböden.</lead>
       <list>
         <item>Nutzen Sie die Navigation auf der linken Seite, um durch die Kapitel zu blättern.</item>
         <item>Achten Sie auf wichtige HINWEIS- und VORSICHT-Boxen für Ihre Sicherheit und ein optimales Ergebnis.</item>
@@ -543,6 +627,14 @@
   </chapter>
 </manual>`;
 
+  // Menü Toggle Logik
+  const menuToggleBtn = document.getElementById('menuToggleBtn');
+  const sidebarMenu = document.getElementById('sidebarMenu');
+
+  menuToggleBtn.addEventListener('click', () => {
+    sidebarMenu.classList.toggle('open');
+  });
+
   document.addEventListener("DOMContentLoaded", () => {
     fetch("daten.xml")
       .then(res => {
@@ -584,7 +676,13 @@
       li.id = 'nav-' + id;
       li.innerHTML = `<span class="nav-num">${num}</span><span class="nav-title">${title}</span>`;
       
-      li.addEventListener('click', () => renderChapter(id));
+      li.addEventListener('click', () => {
+        renderChapter(id);
+        // Menü auf mobilen Geräten nach dem Klicken schließen
+        if (window.innerWidth <= 768) {
+          sidebarMenu.classList.remove('open');
+        }
+      });
       navList.appendChild(li);
     });
   }
@@ -610,7 +708,6 @@
     
     let headerHTML = '';
     if (icon) {
-      // Auch hier die Fehlerunterdrückung entfernt
       headerHTML += `<img src="${icon}" class="chapter-header-icon" alt="Kapitel Icon">`;
     }
     headerHTML += `<div>`;
@@ -639,7 +736,6 @@
         
         let noteContent = '';
         if (type === 'note-warning') {
-          // Namensänderung zu Icon-Vorsicht.png und Entfernen der Fehlerunterdrückung
           noteContent = `<img src="Icon-Vorsicht.png" class="warning-icon" alt="Achtung"> <div>${note.textContent}</div>`;
         } else {
           noteContent = `<div>${note.textContent}</div>`;
@@ -730,6 +826,9 @@
       if (result) card.innerHTML += `<div class="result-block">${result}</div>`;
 
       output.appendChild(card);
+      
+      // Zurück nach ganz oben scrollen, wenn ein neues Kapitel geladen wird
+      document.getElementById('mainContent').scrollTop = 0;
     });
   }
 </script>
