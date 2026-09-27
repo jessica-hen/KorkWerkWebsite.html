@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Korkwerk | Digitales Handbuch</title>
+  <style>
+    :root {
+      --primary: #007799;
+      --primary-hover: #005a74;
+      --bg-canvas: #f8fafc;
+      --bg-card: #ffffff;
+      
+      --bg-sidebar: #f3f4f6; 
+      --text-sidebar: #374151;
+      --border-sidebar: #d1d5db;
+
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --warning-bg: #fffbeb;
+      --warning-border: #f59e0b;
+      --info-bg: #eff6ff;
+      --info-border: #3b82f6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 280px;
+      background-color: var(--bg-sidebar);
+      color: var(--text-sidebar);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      border-right: 1px solid var(--border-sidebar);
+    }
+
+    .brand {
+      padding: 2rem 1.5rem;
+      border-bottom: 1px solid var(--border-sidebar);
+      text-align: center;
+    }
+
+    .brand img {
+      max-width: 90%;
+      height: auto;
+      margin-bottom: 0.5rem;
+    }
+
+    .brand p { 
+      font-size: 0.95rem; 
+      color: #374151; 
+      margin-top: 1rem; 
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 1rem 0;
+    }
+
+    .nav-item {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      transition: background 0.2s;
+      color: var(--text-sidebar);
+    }
+
+    .nav-item:hover { background-color: rgba(0,0,0,0.05); }
+    
+    .nav-item.active {
+      background-color: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .nav-num { font-size: 0.85rem; opacity: 0.8; min-width: 18px; }
+
+    .main-content {
+      flex: 1;
+      padding: 3rem;
+      overflow-y: auto;
+      background-color: var(--bg-canvas);
+    }
+
+    .content-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .chapter-header {
+      margin-bottom: 2rem;
+      border-bottom: 3px solid var(--primary);
+      padding-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .chapter-header-icon { width: 60px; height: 60px; object-fit: contain; }
+    .chapter-number-large { font-size: 1.2rem; color: var(--primary); font-weight: bold; margin-bottom: -0.2rem; }
+    .chapter-title { font-size: 2.5rem; color: var(--text-main); line-height: 1.1; }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 10px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .guiding-question {
+      align-self: flex-start;
+      background-color: #e0f2fe;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+    }
+
+    .section-title { font-size: 1.4rem; font-weight: 700; }
+    .lead-text { font-size: 1rem; color: var(--text-main); }
+
+    .note-info, .note-warning {
+      padding: 0.75rem 1rem;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.95rem;
+      margin: 0.5rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .note-info { background-color: var(--info-bg); border-left: 4px solid var(--info-border); color: #1e40af; }
+    .note-warning { background-color: var(--warning-bg); border-left: 4px solid var(--warning-border); color: #b45309; font-weight: 500; }
+    .warning-icon { height: 1.2rem; margin-top: 0.2rem; }
+
+    .prereq-block { background-color: #f8fafc; border-left: 3px solid var(--text-muted); padding: 1rem; }
+    .prereq-block li { list-style: none; padding-left: 1.25rem; position: relative; margin-bottom: 0.25rem;}
+    .prereq-block li::before { content: "►"; position: absolute; left: 0; font-size: 0.8rem; }
+    
+    .step-list { padding-left: 1.5rem; }
+    .concept-list { padding-left: 1.5rem; margin-top: 0.5rem;}
+    
+    .result-block { padding: 0.75rem 1rem; background-color: #f0fdf4; border-left: 3px solid #16a34a; color: #15803d; font-weight: 500; }
+    .result-block::before { content: "▷ "; font-weight: bold; }
+
+    .tech-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .tech-table th, .tech-table td { padding: 0.75rem; border-bottom: 1px solid var(--border); }
+    .tech-table th { background-color: #f8fafc; }
+
+    .video-container {
+      position: relative; width: 100%; padding-bottom: 56.25%; background: #000; border-radius: 8px; overflow: hidden; margin: 1rem 0;
+    }
+    .video-container iframe, .video-container video {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; object-fit: cover;
+    }
+
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="brand">
+      <!-- Fehler-Unterdrückung entfernt, um Fehler anzuzeigen, falls Name nicht passt -->
+      <img src="Logo_Korkwerk.png" alt="Korkwerk Logo">
+      <p>Korkparkett Verlege-Anleitung<br>für Fachpersonal</p>
+    </div>
+    <ul class="nav-list" id="sidebarNav">
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="content-container">
+      <div id="manualOutput">
+      </div>
+    </div>
+  </main>
+
+<script>
+  let globalXMLDoc = null;
+
+  const fallbackXML = `<?xml version="1.0" encoding="UTF-8"?>
+<manual>
+  
+  <chapter id="kapitel-home">
+    <number></number>
+    <title>Willkommen bei Korkwerk</title>
+    <section id="start-intro" type="concept">
+      <media type="image" src="Titelblatt_Wohnbeispiel.jpg"  />
+      <lead>Herzlich willkommen in der digitalen Verlege-Anleitung von Korkwerk. Diese interaktive Anleitung unterstützt Fachpersonal Schritt für Schritt bei der perfekten Verlegung unserer natürlichen Korkböden.</lead>
+      <list>
+        <item>Nutzen Sie die Navigation auf der linken Seite, um durch die Kapitel zu blättern.</item>
+        <item>Achten Sie auf wichtige HINWEIS- und VORSICHT-Boxen für Ihre Sicherheit und ein optimales Ergebnis.</item>
+        <item>Im Kapitel "Vorbereitung" finden Sie unterstützende Praxisvideos.</item>
+      </list>
+    </section>
+  </chapter>
+
+  <chapter id="kapitel-einleitung">
+    <number>01</number>
+    <icon>Icon-Info-Symbol.png</icon>
+    <title>Zu dieser Anleitung</title>
+    <section id="eingrenzung-inhalt" type="concept">
+      <guiding-question>Für wen ist diese Anleitung geschrieben?</guiding-question>
+      <title>Eingrenzung des Inhaltes</title>
+      <lead>Der Inhalt dieser Anleitung ist ausgerichtet auf Personen mit mindestens einer abgeschlossenen Berufsausbildung als Schreiner, Bodenleger oder einer Vergleichbaren Ausbildung. Deshalb sind folgende Informationen nicht enthalten:</lead>
+      <list>
+        <item>Warnungen vor alltäglichen Gefahren bzw. grundlegende Verhaltensregeln auf Baustellen.</item>
+        <item>Informationen zur Bereithaltung und Handhabung von Standardwerkzeugen und der daraus resultierenden Gefahren</item>
+        <item>Informationen zur grundlegenden persönlichen Schutzausrüstung.</item>
+        <item>Daten zu Produkten beziehen sich auf Produkte der Firma Korkwerk. Verwenden Sie Produkte anderer Hersteller, beachten Sie die Produktdatenblätter.</item>
+      </list>
+    </section>
+    <section id="auszeichnungselemente" type="concept">
+      <guiding-question>Wie wird vor Gesundheits- und Sachschäden gewarnt?</guiding-question>
+      <title>Auszeichnungselemente</title>
+      <note type="warning">VORSICHT: Art und Quelle einer Gefahr! Mögliche Folgen, Benennung der möglichen Verletzungen. Gegenmaßnahmen, um der Gefahr entgegenzutreten.</note>
+      <note type="info">HINWEIS: Mögliche Sachschäden! Nähere Informationen. Gegenmaßnahmen, um Sachschäden entgegenzutreten.</note>
+    </section>
+    <section id="weitere-unterlagen" type="concept">
+      <guiding-question>Welche Dokumente enthalten wichtige Informationen?</guiding-question>
+      <title>Weitere Unterlagen</title>
+      <lead>Sie müssen folgende Unterlagen zusätzlich zu dieser Anleitung vorliegen haben und lesen, da in dieser Anleitung darauf verwiesen wird.:</lead>
+      <list>
+        <item>TKB-Merkblatt 8: Stand 2026; Herausgeber: Industrieverband Klebstoffe e.V.</item>
+        <item>TKB-Merkblatt 5: Stand 2017; Herausgeber: Industrieverband Klebstoffe e.V.</item>
+        <item>Produkt-Informationsblätter der verwendeten Hilfsstoffe</item>
+      </list>
+    </section>
+  </chapter>
+
+  <chapter id="kapitel-sicherheit">
+    <number>02</number>
+    <icon>Icon-sicherheit.png</icon>
+    <title>Sicherheit</title>
+    <section id="bestimmungsgemaesse-verwendung" type="concept">
+      <guiding-question>Für welche Räume ist Korkparkett der richtige Bodenbelag?</guiding-question>
+      <title>Bestimmungsgemäße Verwendung</title>
+      <lead>Korkparkett eignet sich nur für folgende Anwendungsbereiche:</lead>
+      <list>
+        <item>Wohnbereich: Alle Räume außer Nassbereiche</item>
+        <item>Industriebereich: Büroraume, Aufenthaltsräume</item>
+        <item>Räume mit Fußbodenheizung: Es dürfen nur Korparkett-Fliesen verwendet werden, die maximal 6,0 mm dick sind.</item>
+      </list>
+      <lead>Korkparkett muss vollflächig verklebt werden, auf einem belegereifen Untergrund. Korkböden sind nur belastbar, wenn sie nach der Verlegung lackiert werden.</lead>
+    </section>
+    <section id="allgemeine-sicherheitshinweise" type="concept">
+      <guiding-question>Was können Sie tun, um Gesundheitsgefahren grundsätzlich zu verhindern?</guiding-question>
+      <title>Allgemeine Sicherheitshinweise</title>
+      <list>
+        <item>Gesundheitsgefahr beim Verlegen: Sorgen Sie für gute Belüftung, bevor Sie mit dem Verlegen beginnen. Lösungsmittel können sich in der Raumluft anreichern und zu Schwindel, Übelkeit oder allergischen Reaktionen führen. Vermeiden Sie Haut- und Augenkontakt mit dem Kleber. Tragen Sie persönliche Schutzausrüstung.</item>
+        <item>Gesundheitsgefahr beim Schleifen: Sorgen Sie für gute Belüftung und tragen Sie Ihre persönliche Schutzausrüstung. Kork- und Staubpartikel können Augen und Atemwege reizen.</item>
+        <item>Gesundheitsgefahr beim Lackieren: Sorgen Sie für gute Belüftung, bevor Sie mit dem Versiegeln bzw. Lackieren beginnen. Vermeiden Sie Haut- und Augenkontakt mit dem Lack. Tragen Sie persönliche Schutzausrüstung.</item>
+      </list>
+    </section>
+  </chapter>
+
+  <chapter id="kapitel-produktbeschreibung">
+    <number>03</number>
+    <icon>Icon-Produktbeschreibung.png</icon>
+    <title>Produktbeschreibung</title>
+    <section id="produktbeschreibung-detail" type="concept">
+      <guiding-question>Um welches Produkt geht es in dieser Anleitung?</guiding-question>
+      <title>Produktbeschreibung</title>
+      <list>
+        <item>Korkparkett ist ein weicher, warmer aber empfindlicher Bodenbelag. Der Korkparkett besteht aus verlegefertigen Korkparkett-Fliesen in den Abmaßen 60 x 30+ cm.</item>
+        <item>Korkparkett ist ein natürlicher Baustoff. Nicht alle Korkparkett-Fliesen sind farblich exakt gleich. Daher ist es wichtig, dass Korkparkett-Fliesen aus mehreren Paketen gleichzeitig entnommen und verlegt werden.</item>
+        <item>Alle in dieser Anleitung angegebenen Daten beziehen sich auf Baustoffe der Firma Korkwerk. Verwenden Sie Produkte anderer Hersteller, beachten Sie die Informationen auf den jeweiligen Produkt-Informationsblätter.</item>
+      </list>
+    </section>
+  </chapter>
+
+  <chapter id="kapitel-vorbereitung">
+    <number>04</number>
+    <icon>Icon-Vorbereitung.png</icon>
+    <title>Vorbereitung</title>
+    <section id="daten-vorbereitung" type="reference">
+      <guiding-question>Welche Daten zur Baustelle sind wichtig?</guiding-question>
+      <title>Daten zur Vorbereitung</title>
+      <technical-data>
+        <item><name>Ablüftezeit neuer Estriche</name><value>ca. 6 Wochen</value></item>
+        <item><name>Zulässige Unebenheit des Estriches</name><value>&lt; 1,5 mm/m</value></item>
+        <item><name>Zementestrich Restfeuchte</name><value>&lt; 2,0 CM-%</value></item>
+        <item><name>Anhydritestrich Restfeuchte</name><value>&lt; 0,5 CM-%</value></item>
+        <item><name>Raumtemperatur</name><value>≥ 18 °C</value></item>
+        <item><name>Luftfeuchtigkeit</name><value>&lt; 70 %</value></item>
+        <item><name>Akklimatisierungszeit</name><value>48 h</value></item>
+        <item><name>Mindestmaß für Versatz der Stöße (unabhängig vom Verlegemuster)</name><value>15 cm</value></item>
+      </technical-data>
+      <note type="info">Weitere Informationen finden Sie auf den Produkt-Informationsblättern der verwendeten Hilfsstoffe.</note>
+    </section>
+    <section id="verlege-arbeitsrichtung" type="concept">
+      <guiding-question>Wie treffe ich die grundlegenden Entscheidungen zur Verlegung?</guiding-question>
+      <title>Verlege- und Arbeitsrichtung</title>
+      
+      <media type="video" src="Korkwerk_Verlegerichtung.mp4" caption="Praxisvideo: Verlege- und Arbeitsrichtung optimal bestimmen" />
+      
+      <lead>Es ist wichtig, das Korkparkett so zu verlegen, dass die Richtung der Fugen den Raum nicht bricht. Beachten Sie daher folgende Punkte:</lead>
+      <list>
+        <item>Die Längsfugen sollen parallel zum einfallenden Licht des größten Fensters verlaufen.</item>
+        <item>Wenn Sie von der Türe aus in den Raum blicken, sollten Sie Längsfugen sehen und keine Querfugen.</item>
+        <item>Verlegen Sie die Korkparkett-Fliesen im Verband, damit keine Kreuzfugen entstehen. Halten Sie dabei das Mindesmaß für den Versatz ein.</item>
+        <item>Achten Sie auf die Form des Raumes und legen Sie evtl. einige Korkparkettfliesen als Muster aus, um Ihre Entscheidung zu prüfen!</item>
+        <item>Wählen Sie eine Arbeitsrichtung, die verhindert, dass Sie auf den frisch verlegten Korkparkett-Fliesen laufen müssen.</item>
+      </list>
+    </section>
+    <section id="einbausituation-pruefen" type="task">
+      <guiding-question>Wie beginne ich die Arbeiten?</guiding-question>
+      <title>Einbausituation prüfen</title>
+      <prerequisites>
+        <item>Sie haben das TKB-Merkblatt 8 gelesen.</item>
+        <item>Sie haben das TKB-Merkblatt 5 gelesen.</item>
+      </prerequisites>
+      <steps>
+        <step>Prüfen Sie, ob das Korkparkett ein geeigneter Bodenbelag für die vorgefundene Einbausituation ist.</step>
+        <step>Platzbedarf für die Verlegearbeiten schaffen.</step>
+        <step>Untergrund beurteilen.</step>
+        <step>Legen Sie das Verlegemuster fest und ermitteln Sie den Verschnitt und somit die benötigte Menge an Korkparkett-Fliesen.</step>
+        <step>Prüfen Sie die Produkt-Informationsblätter von Kleber und Lack, um sicherzustellen, dass nur für das Korkparkett zugelassene Hilfsstoffe verwendet werden.</step>
+      </steps>
+      <result>Sie kennen die Einbausituation und können die weiteren Schritte festlegen und durchführen.</result>
+    </section>
+    <section id="untergrund-vorbereiten" type="task">
+      <guiding-question>Wie erzeuge ich den perfekten Untergrund?</guiding-question>
+      <title>Untergrund belegereif vorbereiten</title>
+      <prerequisites>
+        <item>Sie haben die Einbausituation geprüft.</item>
+        <item>Sie haben festgelegt, welche der folgenden Schritte notwendig sind, um einen belegereifen Untergrund sicherzustellen.</item>
+      </prerequisites>
+      <steps>
+        <step>Säubern Sie den Untergrund.</step>
+        <step>Prüfen Sie den Untergrund auf Ebenheit.</step>
+        <step>Prüfen Sie die Feuchtigkeit des Untergrundes (Daten zur Vorbereitung).</step>
+        <step>Gleichen Sie unebene Flächen aus, z. B. durch Spachteln.</step>
+        <step>Grundieren Sie den Untergrund.</step>
+        <step>Überschleifen Sie den Untergrund.</step>
+        <step>Halten Sie Trockenzeiten der Grundierung ein.</step>
+      </steps>
+      <result>Sie haben einen belegereifen Untergrund vorbereitet.</result>
+    </section>
+    <section id="korkparkett-akklimatisieren" type="task">
+      <guiding-question>Wie lagere ich das Korkparkett auf der Baustelle?</guiding-question>
+      <title>Korkparkett akklimatisieren</title>
+      <prerequisites>
+        <item>Der Untergrund ist belegereif.</item>
+        <item>Raumtemperatur und Luftfeuchtigkeit entsprechen den angegebenen Daten.</item>
+      </prerequisites>
+      <steps>
+        <step>Legen Sie die benötigte Menge an Korkparkett in den Raum, in dem er verlegt werden soll.</step>
+        <step>Halten Sie die Zeit zur Akklimatisierung ein (mind. 48 h).</step>
+      </steps>
+      <result>Das Material ist an das Raumklima angepasst.</result>
+    </section>
+    <section id="korkparkett-vorsortieren" type="task">
+      <guiding-question>Wo verlege ich welche Korkparkett-Fliese?</guiding-question>
+      <title>Korkparkett vorsortieren</title>
+      <prerequisites>
+        <item>Die benötigte Menge an Korkparkett ist akklimatisiert.</item>
+      </prerequisites>
+      <steps>
+        <step>Sortieren Sie unbrauchbare oder stark beschädigte Korkparkett-Fliesen aus und entsorgen diese.</step>
+        <step>Sortieren Sie leicht beschädigte Fliesen aus und planen Sie deren Verlegung im Randbereich des Raumes ein.</step>
+        <step>Mischen Sie Korkparkett-Fliesen der einzelnen Pakete, um ein gleichmäßiges Farbbild zu erhalten.</step>
+      </steps>
+      <result>Sie haben die Korkparkett-Fliesen vorsortiert und wissen jetzt, wie die Korkparkett-Fliesen im Raum platziert werden.</result>
+    </section>
+  </chapter>
+
+  <chapter id="kapitel-verlegung">
+    <number>05</number>
+    <icon>Icon-Verlegung.png</icon>
+    <title>Verlegung</title>
+    <section id="daten-verlegung" type="reference">
+      <guiding-question>Welche Daten zur Verlegung wichtig?</guiding-question>
+      <title>Daten zur Verlegung</title>
+      <technical-data>
+        <item><name>Raumtemperatur</name><value>≥ 18 °C</value></item>
+        <item><name>Luftfeuchtigkeit</name><value>&lt; 70 %</value></item>
+        <item><name>Offenzeit des Klebers (auf Korkparkett-Fliesen)</name><value>max. 48 h</value></item>
+        <item><name>Ablüftezeit des Klebers (auf dem Untergrund)</name><value>Nach Herstellerangabe</value></item>
+        <item><name>Einlegezeit des Klebers</name><value>2-3 h</value></item>
+      </technical-data>
+      <note type="info">Weitere Informationen finden Sie auf den Produkt-Informationsblättern der verwendeten Hilfsstoffe.</note>
+    </section>
+    <section id="korkparkett-verkleben" type="task">
+      <guiding-question>Was ist bei der Verlegung zu beachten?</guiding-question>
+      <title>Korkparkett verkleben</title>
+      <note type="warning">VORSICHT Verletzungsgefahr durch den Kleber! Allergische Hautreaktionen und Hautschädigungen durch Kontakt mit dem Kleber. Halten Sie Werkzeuge sauber. Tragen Sie Ihre persönliche Schutzausrüstung. Entfernen Sie Kleber umgehend nach Haut- oder Augenkontakt.</note>
+      <note type="info">HINWEIS Getroffene Festlegungen prüfen! Besonders bei Räumen, die nicht rechteckige Grundrisse haben, hilft eine Prüfung, um spätere Fehler zu vermeiden. Legen Sie einige Musterfliesen aus, um die gewählte Verlegerichtung zu prüfen. Prüfen Sie den gewählten Startpunkt. Prüfen Sie den ermittelten Verschnitt für das gewählte Verlegemuster.</note>
+      <prerequisites>
+        <item>Sie kennen Arbeitsschritte und Vorgehensweisen um die Korkparkett-Fliesen zu verkleben.</item>
+        <item>Sie haben das TKB-Merkblatt 5 gelesen.</item>
+      </prerequisites>
+      <steps>
+        <step>Verkleben Sie den Korkparkett, einschließlich aller Nebentätigkeiten.</step>
+        <step>Montieren Sie Sockelleisten.</step>
+        <step>Montieren Sie Bodenleisten an Türen.</step>
+      </steps>
+      <result>Sie haben den Korkparkett verklebt.</result>
+    </section>
+  </chapter>
+
+  <chapter id="kapitel-reinigung">
+    <number>06</number>
+    <icon>IconReinigung.png</icon>
+    <title>Reinigung</title>
+    <section id="daten-reinigung" type="reference">
+      <guiding-question>Welche Daten zur Reinigung wichtig?</guiding-question>
+      <title>Daten zur Reinigung</title>
+      <technical-data>
+        <item><name>Begehbarkeit</name><value>sofort nach dem Verkleben</value></item>
+      </technical-data>
+      <note type="info">Weitere Informationen finden Sie auf den Produkt-Informationsblättern der verwendeten Hilfsstoffe.</note>
+    </section>
+    <section id="korkparkett-reinigen" type="task">
+      <guiding-question>Wie reinige ich frisch verlegten Korkparkett?</guiding-question>
+      <title>Neu verlegten Korkparkett reinigen</title>
+      <note type="info">HINWEIS Empfindliche Oberfläche! Korkparkett ist sehr empfindlich, solange die Oberfläche nicht versiegelt oder lackiert ist. Betreten Sie den Korkparkett nur, wenn es unbedingt notwendig ist. Betreten Sie den Korkparkett nur mit sauberen Schuhen mit feinem Profil. Schützen Sie den Korkparkett vor dem Betreten durch Unbefugte.</note>
+      <prerequisites>
+        <item>Der Korkparkett wurde vollständig verlegt, einschließlich der Sockelleisten.</item>
+      </prerequisites>
+      <steps>
+        <step>Reinigen Sie den Korkparkett mit einem Staubsauger.</step>
+        <step>Reparieren Sie schadhafte Stellen.</step>
+      </steps>
+      <result>Sie haben den Korkparkett gereinigt, er kann lackiert werden.</result>
+    </section>
+  </chapter>
+
+  <chapter id="kapitel-lackierung">
+    <number>07</number>
+    <icon>Icon-Lackierung.png</icon>
+    <title>Lackierung</title>
+    <section id="daten-lackierung" type="reference">
+      <guiding-question>Welche Daten zur Lackierung wichtig?</guiding-question>
+      <title>Daten zur Lackierung</title>
+      <technical-data>
+        <item><name>Anzahl der Lackschichten</name><value>3-5 Stück</value></item>
+        <item><name>Lackverbrauch 1. Lackschicht</name><value>ca. 0-80 ml/m²</value></item>
+        <item><name>Lackverbrauch 2. - max. 5. Lackschicht</name><value>ca. 80-120 ml/m²</value></item>
+        <item><name>Lackverbrauch gesamt</name><value>ca. 350 ml/m²</value></item>
+        <item><name>Trockenzeit 1. - vorletzte Lackschicht</name><value>ca. 2-3 h (maximal 12 h)</value></item>
+        <item><name>Überschrittene Trockenzeit zwischen zwei Lackschichten</name><value>&gt; 24 h Anschleifen notwendig</value></item>
+        <item><name>Trockenzeit letze Lackschicht</name><value>ca. 3-5 h</value></item>
+        <item><name>Begehbarkeit der Lackierung nach letzter Lackschicht</name><value>ca. 12 h</value></item>
+        <item><name>Aushärtezeit der Lackierung</name><value>ca. 48 h</value></item>
+        <item><name>Wartezeit bis zur Belastbarkeit der Lackierung</name><value>ca. 2 Wochen</value></item>
+        <item><name>Wartezeit bis zur Feuchtreinigung der Lackierung</name><value>ca. 2 Wochen</value></item>
+      </technical-data>
+      <note type="info">Weitere Informationen finden Sie auf den Produkt-Informationsblättern der verwendeten Hilfsstoffe.</note>
+    </section>
+    <section id="korkparkett-lackieren" type="task">
+      <guiding-question>Was ist bei der Lackierung zu beachten?</guiding-question>
+      <title>Korkparkett lackieren</title>
+      <note type="warning">VORSICHT Verletzungsgefahr durch den Lack! Allergische Hautreaktionen und Hautschädigungen durch Kontakt mit dem Lack. Halten Sie Werkzeuge sauber. Tragen Sie Ihre persönliche Schutzausrüstung. Entfernen Sie Lacke umgehend nach Haut- oder Augenkontakt.</note>
+      <note type="info">HINWEIS Unebene Lackschichten! Beim Lackieren sind Lufteinschlüsse zwischen den Lackschichten oder unebene Oberflächen möglich. Verteilen Sie nasse Lacke besser. Schleifen Sie abgetrocknete Lacke leicht an.</note>
+      <prerequisites>
+        <item>Sie kennen Arbeitsschritte und Vorgehensweisen um die Korkparkett-Fliesen zu lackieren.</item>
+        <item>Sie haben das TKB-Merkblatt 5 gelesen.</item>
+        <item>Der Korkparkett muss gereinigt sein.</item>
+      </prerequisites>
+      <steps>
+        <step>Lackieren Sie den Korkparkett, einschließlich aller Nebentätigkeiten.</step>
+      </steps>
+      <result>Sie haben den Korkparkett lackiert.</result>
+    </section>
+  </chapter>
+
+  <chapter id="kapitel-umwelt-entsorgung">
+    <number>08</number>
+    <icon>Icon-Umwelt.png</icon>
+    <title>Umwelt / Entsorgung</title>
+    <section id="entsorgung-details" type="concept">
+      <guiding-question>Welche Informationen zur Entsorgung sind wichtig?</guiding-question>
+      <title>Umwelt / Entsorgung</title>
+      <list>
+        <item>Korkreste: Entsorgung über den Hausmüll</item>
+        <item>Kleber und Lacke: Entsorgung gem. den örtlichen Vorschriften bzw den Informationen auf dem Produktdatenblatt.</item>
+        <item>Weitere Informationen finden Sie auf den Produkt-Informationsblättern der verwendeten Hilfsstoffe.</item>
+      </list>
+    </section>
+  </chapter>
+
+  <chapter id="kapitel-sortiment">
+    <number>09</number>
+    <icon>Icon-unser sortiment und Glossar_2.png</icon>
+    <title>Unser Sortiment</title>
+    <section id="sortiment-details" type="reference">
+      <guiding-question>Welche Hilfstoffe bieten wir an?</guiding-question>
+      <title>Unser Sortiment</title>
+      <technical-data>
+        <item><name>Kleber xy - 5 Liter</name><value>18601860</value></item>
+        <item><name>Lack xy - 5 Liter</name><value>18601861</value></item>
+        <item><name>Reinigungsmittel - 1 Liter</name><value>18601862</value></item>
+        <item><name>Politur - 1 Liter</name><value>18601863</value></item>
+      </technical-data>
+    </section>
+  </chapter>
+
+  <chapter id="kapitel-glossar">
+    <number>10</number>
+    <icon>Icon-Glossar.png</icon>
+    <title>Glossar</title>
+    <section id="glossar-details" type="reference">
+      <guiding-question>Was ist damit gemeint?</guiding-question>
+      <title>Glossar</title>
+      <lead>Die verwendeten Benennungen in dieser Anleitung werden verwendet, wie folgt beschrieben:</lead>
+      <technical-data>
+        <item><name>Ablüftezeit</name><value>Zeitfenster zwischen dem Auftragen des Klebers auf den Boden und dem frühest möglichen Beginn des Verlegens</value></item>
+        <item><name>Aushärtezeit</name><value>Bezogen auf Kleber, Fugenmaterial und die Abschließende Aushärtezeit von Lack, nach dem Aufbringen der letzten Lackschicht.</value></item>
+        <item><name>Belegreife, belegreif</name><value>Zustand eines Untergrundes, in dem er für die schadens- und mangelfreie, dauerhafte Aufnahme eines Bodenbelags oder einer Beschichtung geeignet ist</value></item>
+        <item><name>Einlegezeit</name><value>Zeitfenster für das Verlegen des Bodens - Startet am Ende der Ablüftezeit des Klebers und endet mit dem Aushärten des Klebers</value></item>
+        <item><name>Hilfsstoffe</name><value>Alle Produkte, die zum Verlegen, Reinigen und Lackieren des Korkparkett notwendig sind, z.B. Kleber, Lacke usw.</value></item>
+        <item><name>Kleberoffenzeit</name><value>Zeitfenster zwischen dem Auftragen des Klebers auf Korkparkett-Fliesen und der Verlegung</value></item>
+        <item><name>Trockenzeit</name><value>Bezogen auf Estriche, Spachtelungen, Grundierungen und Lacke - beginnt mit der Fertigstellung bzw. dem Auftragen und endet mit Eintritt der Belegreife, z.B. auch weitere Lackschicht</value></item>
+      </technical-data>
+    </section>
+  </chapter>
+</manual>`;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("daten.xml")
+      .then(res => {
+        if (!res.ok) throw new Error("Netzwerkfehler");
+        return res.text();
+      })
+      .then(xmlString => {
+        parseAndInit(xmlString);
+      })
+      .catch(error => {
+        parseAndInit(fallbackXML);
+      });
+  });
+
+  function parseAndInit(xmlString) {
+    const parser = new DOMParser();
+    globalXMLDoc = parser.parseFromString(xmlString, "application/xml");
+    if (globalXMLDoc.getElementsByTagName("parsererror").length > 0) {
+      alert("XML-Fehler."); return;
+    }
+    buildSidebar();
+    
+    const firstId = globalXMLDoc.getElementsByTagName('chapter')[0].getAttribute('id');
+    renderChapter(firstId);
+  }
+
+  function buildSidebar() {
+    const navList = document.getElementById('sidebarNav');
+    navList.innerHTML = '';
+    
+    const chapters = globalXMLDoc.getElementsByTagName('chapter');
+    Array.from(chapters).forEach(chapter => {
+      const id = chapter.getAttribute('id');
+      const num = chapter.getElementsByTagName('number')[0]?.textContent || '';
+      const title = chapter.getElementsByTagName('title')[0]?.textContent || '';
+      
+      const li = document.createElement('li');
+      li.className = 'nav-item';
+      li.id = 'nav-' + id;
+      li.innerHTML = `<span class="nav-num">${num}</span><span class="nav-title">${title}</span>`;
+      
+      li.addEventListener('click', () => renderChapter(id));
+      navList.appendChild(li);
+    });
+  }
+
+  function renderChapter(chapterId) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('nav-' + chapterId)?.classList.add('active');
+
+    const output = document.getElementById('manualOutput');
+    output.innerHTML = '';
+
+    const chapters = Array.from(globalXMLDoc.getElementsByTagName('chapter'));
+    const targetChapter = chapters.find(ch => ch.getAttribute('id') === chapterId);
+    
+    if (!targetChapter) return;
+
+    const num = targetChapter.getElementsByTagName('number')[0]?.textContent || '';
+    const title = targetChapter.getElementsByTagName('title')[0]?.textContent || '';
+    const icon = targetChapter.getElementsByTagName('icon')[0]?.textContent || '';
+    
+    const header = document.createElement('div');
+    header.className = 'chapter-header';
+    
+    let headerHTML = '';
+    if (icon) {
+      // Auch hier die Fehlerunterdrückung entfernt
+      headerHTML += `<img src="${icon}" class="chapter-header-icon" alt="Kapitel Icon">`;
+    }
+    headerHTML += `<div>`;
+    if(num) {
+      headerHTML += `<div class="chapter-number-large">Kapitel ${num}</div>`;
+    }
+    headerHTML += `<h2 class="chapter-title">${title}</h2></div>`;
+    
+    header.innerHTML = headerHTML;
+    output.appendChild(header);
+
+    const sections = targetChapter.getElementsByTagName('section');
+    Array.from(sections).forEach(section => {
+      const card = document.createElement('article');
+      card.className = 'card';
+
+      const question = section.getElementsByTagName('guiding-question')[0]?.textContent;
+      if (question) card.innerHTML += `<span class="guiding-question">${question}</span>`;
+
+      const secTitle = section.getElementsByTagName('title')[0]?.textContent;
+      if (secTitle) card.innerHTML += `<h3 class="section-title">${secTitle}</h3>`;
+
+      const notesNodes = section.getElementsByTagName('note');
+      Array.from(notesNodes).forEach(note => {
+        const type = note.getAttribute('type') === 'warning' ? 'note-warning' : 'note-info';
+        
+        let noteContent = '';
+        if (type === 'note-warning') {
+          // Namensänderung zu Icon-Vorsicht.png und Entfernen der Fehlerunterdrückung
+          noteContent = `<img src="Icon-Vorsicht.png" class="warning-icon" alt="Achtung"> <div>${note.textContent}</div>`;
+        } else {
+          noteContent = `<div>${note.textContent}</div>`;
+        }
+        
+        card.innerHTML += `<div class="${type}">${noteContent}</div>`;
+      });
+
+      const mediaNodes = section.getElementsByTagName('media');
+      Array.from(mediaNodes).forEach(media => {
+        if (media.getAttribute('type') === 'video') {
+          const src = media.getAttribute('src');
+          let videoHTML = '';
+          
+          if (src.includes('http')) {
+             let embedUrl = src;
+             if (src.includes('drive.google.com') && src.includes('/view')) {
+               embedUrl = src.replace(/\/view.*$/, '/preview');
+             } else if (src.includes('watch?v=')) {
+               embedUrl = src.replace('watch?v=', 'embed/');
+             }
+             videoHTML = `<iframe src="${embedUrl}" allow="autoplay" allowfullscreen loading="lazy"></iframe>`;
+          } else {
+             videoHTML = `<video controls style="width: 100%; height: 100%; object-fit: cover;"><source src="${src}" type="video/mp4">Ihr Browser unterstützt keine Videos.</video>`;
+          }
+
+          card.innerHTML += `
+            <div class="video-container">
+              ${videoHTML}
+            </div>
+            ${media.getAttribute('caption') ? `<p style="font-size:0.85rem; color:#64748b; text-align:center;">${media.getAttribute('caption')}</p>` : ''}
+          `;
+        } else if (media.getAttribute('type') === 'image') {
+          const src = media.getAttribute('src');
+          const caption = media.getAttribute('caption');
+          
+          card.innerHTML += `
+            <div class="image-container" style="text-align: center; margin: 1rem 0;">
+              <img src="${src}" alt="${caption || ''}" style="max-width: 100%; border-radius: 8px;">
+            </div>
+            ${caption ? `<p style="font-size:0.85rem; color:#64748b; text-align:center; font-style:italic;">${caption}</p>` : ''}
+          `;
+        }
+      });
+
+      const leadNodes = section.getElementsByTagName('lead');
+      Array.from(leadNodes).forEach(lead => {
+         card.innerHTML += `<p class="lead-text">${lead.textContent}</p>`;
+      });
+
+      const techData = section.getElementsByTagName('technical-data')[0];
+      if (techData) {
+        let tbl = `<table class="tech-table"><thead><tr><th>Benennung / Eigenschaft</th><th>Wert / Einheit</th></tr></thead><tbody>`;
+        Array.from(techData.getElementsByTagName('item')).forEach(item => {
+          const nameText = item.getElementsByTagName('name')[0]?.textContent || '';
+          const valText = item.getElementsByTagName('value')[0]?.textContent || '';
+          tbl += `<tr><td>${nameText}</td><td><strong>${valText}</strong></td></tr>`;
+        });
+        tbl += `</tbody></table>`;
+        card.innerHTML += tbl;
+      }
+
+      const prereqs = section.getElementsByTagName('prerequisites')[0];
+      if (prereqs) {
+        let ul = `<div class="prereq-block"><ul>`;
+        Array.from(prereqs.getElementsByTagName('item')).forEach(p => ul += `<li>${p.textContent}</li>`);
+        ul += `</ul></div>`;
+        card.innerHTML += ul;
+      }
+
+      const stepsNode = section.getElementsByTagName('steps')[0];
+      if (stepsNode) {
+        let ol = `<ol class="step-list">`;
+        Array.from(stepsNode.getElementsByTagName('step')).forEach(st => ol += `<li>${st.textContent}</li>`);
+        ol += `</ol>`;
+        card.innerHTML += ol;
+      }
+
+      const listNode = section.getElementsByTagName('list')[0];
+      if (listNode) {
+        let ul = `<ul class="concept-list">`;
+        Array.from(listNode.getElementsByTagName('item')).forEach(it => ul += `<li>${it.textContent}</li>`);
+        ul += `</ul>`;
+        card.innerHTML += ul;
+      }
+
+      const result = section.getElementsByTagName('result')[0]?.textContent;
+      if (result) card.innerHTML += `<div class="result-block">${result}</div>`;
+
+      output.appendChild(card);
+    });
+  }
+</script>
+</body>
+</html>
