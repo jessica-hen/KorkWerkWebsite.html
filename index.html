@@ -625,6 +625,40 @@
       </technical-data>
     </section>
   </chapter>
+  
+  <chapter id="kapitel-impressum">
+    <number>11</number>
+    <icon>Icon-Info-Symbol.png</icon>
+    <title>Links / Impressum</title>
+    
+    <section id="qr-mobile" type="concept">
+      <guiding-question>Mobiles Handbuch aufrufen</guiding-question>
+      <title>QR-Code zur Website</title>
+      <lead>Scannen Sie den QR-Code mit Ihrem Smartphone oder Tablet, um dieses Montagehandbuch mobil auf der Baustelle zu nutzen.</lead>
+      <media type="image" src="QR_Website.png" caption="Korkwerk Digitales Montagehandbuch" />
+    </section>
+
+    <section id="pdf-download" type="concept">
+      <guiding-question>Druckversion &amp; Offline-Nutzung</guiding-question>
+      <title>PDF-Verlegeanleitung (Printversion)</title>
+      <lead>Hier können Sie das vollständige Handbuch als druckfähiges PDF betrachten oder herunterladen:</lead>
+      <media type="pdf" src="VerlegeAnleitung_KorkWerk_V1.pdf" caption="Korkparkett Verlege-Anleitung Version 1.0" />
+    </section>
+
+    <section id="impressum-daten" type="reference">
+      <guiding-question>Wer steht hinter Korkwerk?</guiding-question>
+      <title>Impressum &amp; Kontakt</title>
+      <technical-data>
+        <item><name>Unternehmen</name><value>Fa. Korkwerk GmbH</value></item>
+        <item><name>Adresse</name><value>Am Korkbaum 7, 00001 Korkwald</value></item>
+        <item><name>Telefon</name><value>+49 800-999999</value></item>
+        <item><name>E-Mail</name><value>Info@Korkwerk.com</value></item>
+        <item><name>Webseite</name><value>www.korkwerk.de</value></item>
+        <item><name>Projektversion</name><value>Version 1.0 - 09/2026 (J. Hensel / M. Fischer)</value></item>
+      </technical-data>
+    </section>
+  </chapter>
+
 </manual>`;
 
   // Menü Toggle Logik
@@ -771,12 +805,29 @@
         } else if (media.getAttribute('type') === 'image') {
           const src = media.getAttribute('src');
           const caption = media.getAttribute('caption');
+          const isQR = src.includes('QR'); // Kleineres Bild für QR Code
           
           card.innerHTML += `
             <div class="image-container" style="text-align: center; margin: 1rem 0;">
-              <img src="${src}" alt="${caption || ''}" style="max-width: 100%; border-radius: 8px;">
+              <img src="${src}" alt="${caption || ''}" style="max-width: ${isQR ? '180px' : '100%'}; border-radius: 8px;">
             </div>
             ${caption ? `<p style="font-size:0.85rem; color:#64748b; text-align:center; font-style:italic;">${caption}</p>` : ''}
+          `;
+        } else if (media.getAttribute('type') === 'pdf') {
+          const src = media.getAttribute('src');
+          const caption = media.getAttribute('caption') || 'PDF herunterladen';
+          
+          card.innerHTML += `
+            <div style="margin: 1.5rem 0; display: flex; flex-direction: column; gap: 1rem;">
+              <a href="${src}" target="_blank" download style="display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: var(--primary); color: white; padding: 0.75rem 1.25rem; border-radius: 6px; text-decoration: none; font-weight: 600; width: fit-content;">
+                📄 ${caption} (Download)
+              </a>
+              <div style="width: 100%; height: 600px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">
+                <iframe src="${src}" style="width: 100%; height: 100%; border: none;">
+                  Ihr Browser unterstützt keine eingebetteten PDFs. Bitte nutzen Sie den Download-Button.
+                </iframe>
+              </div>
+            </div>
           `;
         }
       });
